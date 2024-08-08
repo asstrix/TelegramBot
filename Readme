@@ -1,0 +1,6 @@
+"""
+The Bot is created to schedule tasks, events, actions. You can use it yourself or in groups, e.g. like family shared calendar.
+Neither logging nor ORM is added, that's why it is free, you may add your own logic of commercial usage.
+The scheduler completes outdated events every 24 hours from bot's startup.
+Enjoy!!!
+"""
