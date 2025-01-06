@@ -39,8 +39,8 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/taskmania-bot.git
-   cd taskmania-bot
+   git clone https://github.com/asstrix/TelegramBot.git
+   cd TelegramBot
    ```
 2. Install dependencies:
   ```bash
@@ -49,9 +49,9 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
 3. Set up your Telegram bot:
   - Create a bot using BotFather on Telegram.
   - Copy your bot token.
-4. Add your bot token to the environment or directly in the code:
+4. Add your bot token to cfg.py:
   ```python
-  bot = Bot(token="YOUR_TELEGRAM_BOT_TOKEN")
+  API_TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
   ```
 5. Run the bot:
   ```bash
