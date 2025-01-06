@@ -11,6 +11,13 @@ bot = Bot(token=API_TOKEN)
 
 
 async def delete_previous_messages(message: types.Message, amount=1):
+    """
+    Deletes a specified number of previous messages in the chat.
+
+    Args:
+        message (types.Message): The message object from which deletion starts.
+        amount (int): Number of messages to delete (default is 1).
+    """
     try:
         for i in range(message.message_id, message.message_id - amount, -1):
             await bot.delete_message(message.chat.id, i)
@@ -21,6 +28,13 @@ async def delete_previous_messages(message: types.Message, amount=1):
 # Main menu
 @router.callback_query(lambda x: x.data == 'calendar')
 async def manage_calendar(call: types.CallbackQuery, state: FSMContext):
+    """
+    Displays the user's calendar menu with today's, upcoming, and completed events.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'calendar' button.
+        state (FSMContext): User's finite state context.
+    """
     await state.update_data(today_events=get_today_events(call.from_user.id),
                             upcoming_events=get_upcoming_events(call.from_user.id),
                             completed_events=get_completed_events(call.from_user.id))
@@ -30,6 +44,13 @@ async def manage_calendar(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'about')
 async def tell_about(call: types.CallbackQuery, state: FSMContext):
+    """
+    Displays information about the bot's features and purpose.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'about' button.
+        state (FSMContext): User's finite state context.
+    """
     keyboard = await main_menu(call.from_user.id, state)
     text = """The Bot is created to schedule tasks, events, actions. You can use it yourself or in groups, e.g.\
  like family shared calendar, enjoy!!!"""
@@ -42,6 +63,13 @@ async def tell_about(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'contacts')
 async def show_contacts(call: types.CallbackQuery, state: FSMContext):
+   """
+    Displays contact information for the bot developer.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'contacts' button.
+        state (FSMContext): User's finite state context.
+    """
     keyboard = await main_menu(call.from_user.id, state)
     try:
         await call.message.edit_text('telegram: @francegid', reply_markup=keyboard)
@@ -52,6 +80,13 @@ async def show_contacts(call: types.CallbackQuery, state: FSMContext):
 # Account menu
 @router.callback_query(lambda c: c.data == 'today')
 async def today(call: types.CallbackQuery, state: FSMContext):
+    """
+    Shows the events scheduled for today.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'today' button.
+        state (FSMContext): User's finite state context.
+    """
     await update_state(call.from_user.id, state)
     data = await state.get_data()
     try:
@@ -67,6 +102,13 @@ async def today(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'upcoming')
 async def upcoming(call: types.CallbackQuery, state: FSMContext):
+    """
+    Shows the upcoming events.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'upcoming' button.
+        state (FSMContext): User's finite state context.
+    """
     await update_state(call.from_user.id, state)
     data = await state.get_data()
     try:
@@ -82,6 +124,13 @@ async def upcoming(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'completed')
 async def completed_events(call: types.CallbackQuery, state: FSMContext):
+    """
+    Shows the completed events.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'completed' button.
+        state (FSMContext): User's finite state context.
+    """
     await update_state(call.from_user.id, state)
     data = await state.get_data()
     try:
@@ -96,6 +145,12 @@ async def completed_events(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'manage_account')
 async def manage_acc(call: types.CallbackQuery):
+    """
+    Opens the account management menu.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'manage_account' button.
+    """
     try:
         await call.message.edit_text('Account manager', reply_markup=manage_account())
     except TelegramBadRequest:
@@ -105,6 +160,13 @@ async def manage_acc(call: types.CallbackQuery):
 # Manage account
 @router.callback_query(lambda c: c.data == 'create_account')
 async def add_account(call: types.CallbackQuery, state: FSMContext):
+    """
+    Creates a new user account.
+
+    Args:
+        call (types.CallbackQuery): Callback query from the 'create_account' button.
+        state (FSMContext): User's finite state context.
+    """
     result = add_user(call.from_user.id, call.from_user.username, call.from_user.first_name)
     if result:
         try:
@@ -123,6 +185,17 @@ async def add_account(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'join_account')
 async def get_account(call: types.CallbackQuery, state: FSMContext):
+    """
+    Initiates the process for the user to join an existing account.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'join_account' button.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        Prompts the user to enter the account name they want to join and sets the state
+        to `EventState.join_account` for further processing.
+    """
     await delete_previous_messages(call.message)
     await call.message.answer('Enter account name you would like to join:')
     await state.update_data(last_callback=call.id)
@@ -131,6 +204,18 @@ async def get_account(call: types.CallbackQuery, state: FSMContext):
 
 @router.message(EventState.join_account)
 async def get_event_id(message: types.Message, state: FSMContext):
+    """
+    Processes the account name entered by the user and attempts to join the account.
+
+    Args:
+        message (types.Message): Message object containing the account name.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Validates the account name and attempts to join the account.
+        - Displays appropriate success or failure messages.
+        - Clears the state on completion.
+    """
     await delete_previous_messages(message, 2)
     parent_acc = message.text
     result = s_join_account(parent_acc, message.from_user.id, message.from_user.username, message.from_user.first_name)
@@ -152,6 +237,17 @@ async def get_event_id(message: types.Message, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'delete_account')
 async def delete_account(call: types.CallbackQuery, state: FSMContext):
+     """
+    Deletes the user's account and associated data.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'delete_account' button.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Deletes the user account and all associated events from the database.
+        - Provides feedback to the user and resets the state.
+    """
     result = delete_user(call.from_user.id)
     try:
         await delete_previous_messages(call.message)
@@ -166,6 +262,17 @@ async def delete_account(call: types.CallbackQuery, state: FSMContext):
 # Manage events
 @router.callback_query(lambda c: c.data == 'add_event')
 async def add_event(call: types.CallbackQuery, state: FSMContext):
+    """
+    Starts the process for adding a new event.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'add_event' button.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Prompts the user to enter the event title.
+        - Updates the state to `EventState.title` for further processing.
+    """
     await delete_previous_messages(call.message)
     await state.update_data(event_type='add_event')
     await call.message.answer(f"Please enter the event title:")
@@ -174,6 +281,18 @@ async def add_event(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'event_edit')
 async def upd_event(call: types.CallbackQuery, state: FSMContext):
+    """
+    Initiates the process for editing an existing event.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'event_edit' button.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Retrieves the list of events (upcoming or today's) based on the user's context.
+        - Prompts the user to choose an event to edit.
+        - Updates the state to `EventState.edit_event` for further processing.
+    """
     await delete_previous_messages(call.message)
     data = await state.get_data()
     if data['edit_from'] == 'upcoming_events':
@@ -186,6 +305,17 @@ async def upd_event(call: types.CallbackQuery, state: FSMContext):
 
 @router.message(EventState.edit_event)
 async def get_event_id(message: types.Message, state: FSMContext):
+    """
+    Receives the event ID for editing.
+
+    Args:
+        message (types.Message): Message object containing the event ID.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Updates the state with the selected event ID.
+        - Prompts the user to enter the event title for editing.
+    """
     await delete_previous_messages(message, 2)
     await state.update_data(event_type='edit_event', event_id=int(message.text))
     await message.answer(f"Please enter the event title:")
@@ -194,6 +324,18 @@ async def get_event_id(message: types.Message, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == 'event_delete')
 async def get_event_id(call: types.CallbackQuery, state: FSMContext):
+    """
+    Initiates the process for deleting an event.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'event_delete' button.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Retrieves the list of events (upcoming or today's) based on the user's context.
+        - Prompts the user to choose an event to delete.
+        - Updates the state to `EventState.delete_event` for further processing.
+    """
     await delete_previous_messages(call.message)
     keyboard = InlineKeyboardBuilder()
     keyboard.button(text='◀ Back', callback_data='back_to_cal_menu')
@@ -209,6 +351,18 @@ async def get_event_id(call: types.CallbackQuery, state: FSMContext):
 
 @router.message(EventState.delete_event)
 async def delete_event(message: types.Message, state: FSMContext):
+     """
+    Deletes the specified event.
+
+    Args:
+        message (types.Message): Message object containing the event ID.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Deletes the selected event from the database.
+        - Provides feedback to the user.
+        - Clears the state on completion.
+    """
     await delete_previous_messages(message, 2)
     event_id = int(message.text)
     data = await state.get_data()
@@ -226,6 +380,18 @@ async def delete_event(message: types.Message, state: FSMContext):
 
 @router.message(EventState.title)
 async def event_title(message: types.Message, state: FSMContext):
+    """
+    Handles the input of the event title.
+
+    Args:
+        message (types.Message): The message object containing the event title entered by the user.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Stores the entered title in the state.
+        - Prompts the user to enter the event description.
+        - Updates the state to `EventState.description` for further input.
+    """
     await delete_previous_messages(message, 2)
     await state.update_data(title=message.text)
     await message.answer('Please enter the event description:')
@@ -234,6 +400,17 @@ async def event_title(message: types.Message, state: FSMContext):
 
 @router.message(EventState.description)
 async def event_desc(message: types.Message, state: FSMContext):
+    """
+    Handles the input of the event description.
+
+    Args:
+        message (types.Message): The message object containing the event description entered by the user.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Stores the entered description in the state.
+        - Prompts the user to choose the event's time interval (all day or specific time).
+    """
     await delete_previous_messages(message, 2)
     await state.update_data(description=message.text)
     await message.answer("Choose event's time interval:", reply_markup=choose_duration())
@@ -241,6 +418,17 @@ async def event_desc(message: types.Message, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == "all_day")
 async def event_whole_day(call: types.CallbackQuery, state: FSMContext):
+    """
+    Handles the selection of an all-day event.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the user selecting 'all day'.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Updates the state to indicate the event spans the entire day.
+        - Displays a calendar to select the event's date.
+    """
     try:
         await call.message.edit_text('Select day', reply_markup=draw_calendar())
         await state.update_data(duration='all_day')
@@ -250,6 +438,17 @@ async def event_whole_day(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data == "specific_time")
 async def event_specific_time(call: types.CallbackQuery, state: FSMContext):
+    """
+    Handles the selection of a specific time event.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the user selecting 'specific time'.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Updates the state to indicate the event has a specific time duration.
+        - Displays a calendar to select the event's date.
+    """
     try:
         await call.message.edit_text('Select a day', reply_markup=draw_calendar())
         await state.update_data(duration='specific_time')
@@ -259,6 +458,18 @@ async def event_specific_time(call: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(lambda c: c.data.startswith('day'))
 async def event(call: types.CallbackQuery, state: FSMContext):
+    """
+    Processes the selected event date and time details.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered when a user selects a day on the calendar.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Validates and updates the selected date in the state.
+        - If the event is 'all day', finalizes the event creation or editing.
+        - If the event has a specific time, prompts the user to enter the start or end time.
+    """
     await delete_previous_messages(call.message)
     result = ''
     data = await state.get_data()
@@ -299,6 +510,17 @@ async def event(call: types.CallbackQuery, state: FSMContext):
 
 @router.message(EventState.start_time)
 async def event_start_time(message: types.Message, state: FSMContext):
+    """
+    Handles the input of the event's start time.
+
+    Args:
+        message (types.Message): The message object containing the start time in HH:MM format.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Validates and stores the start time in the state.
+        - Prompts the user to select the event's end day.
+    """
     await delete_previous_messages(message, 2)
     data = await state.get_data()
     year, month, day = data['year'], data['month'], data['day']
@@ -310,6 +532,18 @@ async def event_start_time(message: types.Message, state: FSMContext):
 
 @router.message(EventState.end_time)
 async def event_end_time(message: types.Message, state: FSMContext):
+    """
+    Handles the input of the event's end time.
+
+    Args:
+        message (types.Message): The message object containing the end time in HH:MM format.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Validates and stores the end time in the state.
+        - Completes the event creation or editing process.
+        - Provides feedback to the user.
+    """
     result = ''
     await delete_previous_messages(message, 2)
     data = await state.get_data()
@@ -338,6 +572,15 @@ async def event_end_time(message: types.Message, state: FSMContext):
 # Calendar buttons
 @router.callback_query(lambda c: c.data.startswith('year_back'))
 async def year_back(call: types.CallbackQuery):
+    """
+    Navigates back by one year in the calendar.
+
+    Args:
+        call (types.CallbackQuery): Callback query object containing the current year and month.
+
+    Behavior:
+        - Updates the calendar display to show the same month of the previous year.
+    """
     data = call.data.split('|')
     year, month = int(data[1]) - 1, int(data[2])
     await call.message.edit_reply_markup(reply_markup=draw_calendar(year, month))
@@ -345,6 +588,15 @@ async def year_back(call: types.CallbackQuery):
 
 @router.callback_query(lambda c: c.data.startswith('year_forward'))
 async def year_forward(call: types.CallbackQuery):
+    """
+    Navigates forward by one year in the calendar.
+
+    Args:
+        call (types.CallbackQuery): Callback query object containing the current year and month.
+
+    Behavior:
+        - Updates the calendar display to show the same month of the next year.
+    """
     data = call.data.split('|')
     year, month = int(data[1]) + 1, int(data[2])
     await call.message.edit_reply_markup(reply_markup=draw_calendar(year, month))
@@ -352,6 +604,16 @@ async def year_forward(call: types.CallbackQuery):
 
 @router.callback_query(lambda c: c.data.startswith('month_back'))
 async def month_back_(call: types.CallbackQuery):
+    """
+    Navigates back by one month in the calendar.
+
+    Args:
+        call (types.CallbackQuery): Callback query object containing the current year and month.
+
+    Behavior:
+        - Updates the calendar display to show the previous month.
+        - Adjusts the year if navigating from January to December of the previous year.
+    """
     data = call.data.split('|')
     year, month = int(data[1]), int(data[2]) - 1
     if month < 1:
@@ -362,6 +624,15 @@ async def month_back_(call: types.CallbackQuery):
 
 @router.callback_query(lambda c: c.data.startswith('select_month'))
 async def select_month(call: types.CallbackQuery):
+    """
+    Displays the selected month in the calendar.
+
+    Args:
+        call (types.CallbackQuery): Callback query object containing the selected year and month.
+
+    Behavior:
+        - Updates the calendar display to show the selected month.
+    """
     data = call.data.split('|')
     year, month = int(data[1]), int(data[2])
     await call.message.edit_reply_markup(reply_markup=draw_calendar(year, month))
@@ -369,6 +640,15 @@ async def select_month(call: types.CallbackQuery):
 
 @router.callback_query(lambda c: c.data.startswith('show_months'))
 async def show_months_handler(call: types.CallbackQuery):
+    """
+    Displays a grid of months for the selected year.
+
+    Args:
+        call (types.CallbackQuery): Callback query object containing the current year.
+
+    Behavior:
+        - Updates the calendar display to allow the user to select a specific month.
+    """
     data = call.data.split('|')
     year = int(data[1])
     await call.message.edit_reply_markup(reply_markup=draw_months(year))
@@ -376,6 +656,16 @@ async def show_months_handler(call: types.CallbackQuery):
 
 @router.callback_query(lambda c: c.data.startswith('month_forward'))
 async def month_forward_(call: types.CallbackQuery):
+    """
+    Navigates forward by one month in the calendar.
+
+    Args:
+        call (types.CallbackQuery): Callback query object containing the current year and month.
+
+    Behavior:
+        - Updates the calendar display to show the next month.
+        - Adjusts the year if navigating from December to January of the next year.
+    """
     data = call.data.split('|')
     year, month = int(data[1]), int(data[2]) + 1
     if month > 12:
@@ -387,24 +677,64 @@ async def month_forward_(call: types.CallbackQuery):
 # Back buttons
 @router.callback_query(lambda c: c.data == 'back_to_main_menu')
 async def to_main_menu(call: types.CallbackQuery, state: FSMContext):
+    """
+    Navigates back to the main menu.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'back_to_main_menu' button.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Displays the main menu options to the user.
+    """
     keyboard = await main_menu(call.from_user.id, state)
     await call.message.edit_text('Main menu', reply_markup=keyboard)
 
 
 @router.callback_query(lambda c: c.data == 'back_to_cal_menu')
 async def to_cal_menu(call: types.CallbackQuery, state: FSMContext):
+    """
+    Navigates back to the calendar menu.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'back_to_cal_menu' button.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Displays the calendar menu options to the user.
+    """
     keyboard = await calendar_menu(call.from_user.id, state)
     await call.message.edit_text('Calendar menu', reply_markup=keyboard)
 
 
 @router.callback_query(lambda c: c.data == 'back_to_edit_events')
 async def to_cal_menu(call: types.CallbackQuery):
+    """
+    Navigates back to the event editing menu.
+
+    Args:
+        call (types.CallbackQuery): Callback query object triggered by the 'back_to_edit_events' button.
+
+    Behavior:
+        - Displays the event editing menu options to the user.
+    """
     await call.message.edit_text('Calendar menu', reply_markup=edit_events())
 
 
 # Common handlers
 @router.message(Command(commands=["start"]))
 async def send_welcome(message: types.Message, state: FSMContext):
+    """
+    Sends a welcome message to the user and displays the main menu.
+
+    Args:
+        message (types.Message): The message object triggered by the '/start' command.
+        state (FSMContext): The finite state machine context for tracking user actions.
+
+    Behavior:
+        - Deletes recent messages to clean up the chat.
+        - Greets the user and shows the main menu options.
+    """
     for i in range(message.message_id, message.message_id - 30, -1):
         try:
             await bot.delete_message(message.chat.id, i)
@@ -416,5 +746,15 @@ async def send_welcome(message: types.Message, state: FSMContext):
 
 @router.message()
 async def any_message(message: types.Message):
+    """
+    Handles unexpected messages from the user.
+
+    Args:
+        message (types.Message): The unexpected message sent by the user.
+
+    Behavior:
+        - Deletes the unexpected message to keep the chat clean.
+        - Instructs the user to use the '/start' command to initiate interaction with the bot.
+    """
     await delete_previous_messages(message)
     await message.answer('Enter the /start command to start chatting.')
