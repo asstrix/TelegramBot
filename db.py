@@ -1,3 +1,58 @@
+"""
+Database Management Functions
+
+This module provides a set of functions to initialize and manage a SQLite database
+containing user and event data for an application. Below is the detailed documentation
+for each function:
+
+Functions:
+----------
+
+1. init_db():
+    Initializes the SQLite database. Creates the `users` and `events` tables if they do not exist.
+
+2. get_users_from_db():
+    Retrieves a list of usernames from the `users` table in the database.
+
+3. add_user(user_id: int, username: str, name: str) -> str:
+    Adds a new user to the `users` table. The new user is assigned a unique ID and a parent ID.
+
+4. delete_user(user_id: int) -> str:
+    Deletes a user and their associated events from the database. If the user has child accounts, it reassigns 
+    their relationships to another account.
+
+5. user_exists(user_id: int) -> bool:
+    Checks whether a user exists in the database.
+
+6. get_today_events(user_id: int) -> list:
+    Retrieves today's events for the specified user, based on the user's parent ID.
+
+7. get_upcoming_events(user_id: int) -> list:
+    Retrieves upcoming events for the specified user, based on the user's parent ID.
+
+8. get_completed_events(user_id: int) -> list:
+    Retrieves a list of completed events for the specified user, based on the user's parent ID.
+
+9. s_add_event(*args) -> str:
+    Adds a new event to the `events` table with the specified details.
+
+10. s_update_event(*args) -> str:
+    Updates an existing event in the `events` table.
+
+11. s_delete_event(event_id: int) -> str:
+    Deletes an event from the `events` table by its ID.
+
+12. s_join_account(parent: str, new_user_id: int, new_username: str, new_name: str) -> str:
+    Allows a new user to join an existing user's account as a child.
+
+13. complete_events():
+    Marks all events that have passed their end time as completed.
+
+Note:
+- All database operations ensure proper connection management.
+- Functions handle potential errors gracefully and provide meaningful error messages.
+"""
+
 import sqlite3, logging, datetime
 
 logging.basicConfig(level=logging.INFO)
