@@ -41,18 +41,22 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
    ```bash
    git clone https://github.com/yourusername/taskmania-bot.git
    cd taskmania-bot
+   ```
 2. Install dependencies:
   ```bash
   pip install aiogram
+  ```
 3. Set up your Telegram bot:
   - Create a bot using BotFather on Telegram.
   - Copy your bot token.
 4. Add your bot token to the environment or directly in the code:
   ```python
   bot = Bot(token="YOUR_TELEGRAM_BOT_TOKEN")
+  ```
 5. Run the bot:
   ```bash
   python main.py
+  ```
 
 ## File Structure
 ```bash
@@ -63,6 +67,7 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
 ├── states.py               # States to handle sequences of actions
 ├── README.md               # Project documentation
 ├── requirements.txt        # Project dependencies
+```
 
 ## Usage
 
@@ -89,7 +94,8 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
 
 ## Database Structure
 ### Tables
-###users Table:
+### users Table:
+```
 | Column Name  | Data Type | Description                              |
 |--------------|-----------|------------------------------------------|
 | `id`         | INTEGER   | Primary key.                             |
@@ -98,8 +104,10 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
 | `name`       | TEXT      | Full name of the user.                   |
 | `parent`     | INTEGER   | ID of the parent account.                |
 | `date_created` | DATETIME | Timestamp when the account was created. |
+```
 
-###events Table:
+### events Table:
+```
 | Column Name   | Data Type | Description                                           |
 |---------------|-----------|-------------------------------------------------------|
 | `id`          | INTEGER   | Primary key for the event.                            |
@@ -111,5 +119,5 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
 | `completed`   | INTEGER   | Completion status (0 = not completed, 1 = completed). |
 | `added_by`    | INTEGER   | ID of the user who added the event.                   |
 | `edited_by`   | INTEGER   | ID of the user who last edited the event.             |
-
+```
 ## Screenshots:
