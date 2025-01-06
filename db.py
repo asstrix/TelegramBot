@@ -1,64 +1,18 @@
-"""
-Database Management Functions
-
-This module provides a set of functions to initialize and manage a SQLite database
-containing user and event data for an application. Below is the detailed documentation
-for each function:
-
-Functions:
-----------
-
-1. init_db():
-    Initializes the SQLite database. Creates the `users` and `events` tables if they do not exist.
-
-2. get_users_from_db():
-    Retrieves a list of usernames from the `users` table in the database.
-
-3. add_user(user_id: int, username: str, name: str) -> str:
-    Adds a new user to the `users` table. The new user is assigned a unique ID and a parent ID.
-
-4. delete_user(user_id: int) -> str:
-    Deletes a user and their associated events from the database. If the user has child accounts, it reassigns 
-    their relationships to another account.
-
-5. user_exists(user_id: int) -> bool:
-    Checks whether a user exists in the database.
-
-6. get_today_events(user_id: int) -> list:
-    Retrieves today's events for the specified user, based on the user's parent ID.
-
-7. get_upcoming_events(user_id: int) -> list:
-    Retrieves upcoming events for the specified user, based on the user's parent ID.
-
-8. get_completed_events(user_id: int) -> list:
-    Retrieves a list of completed events for the specified user, based on the user's parent ID.
-
-9. s_add_event(*args) -> str:
-    Adds a new event to the `events` table with the specified details.
-
-10. s_update_event(*args) -> str:
-    Updates an existing event in the `events` table.
-
-11. s_delete_event(event_id: int) -> str:
-    Deletes an event from the `events` table by its ID.
-
-12. s_join_account(parent: str, new_user_id: int, new_username: str, new_name: str) -> str:
-    Allows a new user to join an existing user's account as a child.
-
-13. complete_events():
-    Marks all events that have passed their end time as completed.
-
-Note:
-- All database operations ensure proper connection management.
-- Functions handle potential errors gracefully and provide meaningful error messages.
-"""
-
 import sqlite3, logging, datetime
 
 logging.basicConfig(level=logging.INFO)
 
 
 def init_db():
+	"""
+    	Initializes the SQLite database.
+
+	Creates the following tables if they do not exist:
+ 	- `users`: Stores user data including user ID, username, name, parent ID, and creation date.
+	- `events`: Stores event data including title, description, start and end times, and user associations.
+	
+	This function ensures the necessary database schema is in place for the application.
+    	"""
 	conn = sqlite3.connect('db.db')
 	cursor = conn.cursor()
 	cursor.execute('''
@@ -92,6 +46,13 @@ def init_db():
 
 
 def get_users_from_db():
+	"""
+    	Retrieves all usernames from the `users` table in the database.
+
+    	Returns:
+        None: This function fetches data but does not return it.
+        It needs further implementation to return or use the data.
+    	"""
 	conn = sqlite3.connect('db.db')
 	cursor = conn.cursor()
 	cursor.execute("SELECT username FROM users")
@@ -99,6 +60,19 @@ def get_users_from_db():
 
 
 def add_user(user_id, username, name):
+	"""
+    	Adds a new user to the `users` table.
+
+    	Args:
+        user_id (int): The unique ID of the user.
+        username (str): The username of the user.
+        name (str): The full name of the user.
+
+	Returns:
+	str: Success message if the user is created successfully.
+	str: Error message if an error occurs.
+	bool: False if the username is not provided.
+    	"""
 	if username:
 		try:
 			conn = sqlite3.connect('db.db')
@@ -125,6 +99,16 @@ def add_user(user_id, username, name):
 
 
 def delete_user(user_id):
+	"""
+    	Deletes a user and their associated events from the database.
+
+    	Args:
+        user_id (int): The unique ID of the user to be deleted.
+
+    	Returns:
+        str: Success message if the user is deleted successfully.
+        str: Error message if an error occurs.
+    	"""
 	try:
 		conn = sqlite3.connect('db.db')
 		cursor = conn.cursor()
@@ -156,6 +140,15 @@ def delete_user(user_id):
 
 
 def user_exists(user_id):
+	"""
+    	Checks if a user exists in the `users` table.
+
+    	Args:
+        user_id (int): The unique ID of the user.
+
+    	Returns:
+        bool: True if the user exists, False otherwise.
+    	"""
 	conn = sqlite3.connect('db.db')
 	cursor = conn.cursor()
 	cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (user_id,))
@@ -169,6 +162,15 @@ def user_exists(user_id):
 
 
 def get_today_events(user_id):
+	"""
+    	Retrieves today's events for a specific user.
+
+    	Args:
+        user_id (int): The unique ID of the user.
+
+    	Returns:
+        list: A list of events scheduled for today, or an empty list if none are found.
+    	"""
 	conn = sqlite3.connect('db.db')
 	cursor = conn.cursor()
 	cursor.execute('SELECT parent FROM users WHERE user_id = ?', (user_id,))
@@ -187,6 +189,15 @@ def get_today_events(user_id):
 
 
 def get_upcoming_events(user_id):
+	"""
+    	Retrieves upcoming events for a specific user.
+
+    	Args:
+        user_id (int): The unique ID of the user.
+
+    	Returns:
+        list: A list of upcoming events, or an empty list if none are found.
+    	"""
 	conn = sqlite3.connect('db.db')
 	cursor = conn.cursor()
 	cursor.execute('SELECT parent FROM users WHERE user_id = ?', (user_id,))
@@ -205,6 +216,16 @@ def get_upcoming_events(user_id):
 
 
 def get_completed_events(user_id):
+	"""
+    	Retrieves completed events for a specific user.
+
+    	Args:
+        user_id (int): The unique ID of the user.
+
+    	Returns:
+        list: A list of completed events, including event ID, title, start time, and end time.
+        If no events are found, an empty list is returned.
+	"""
 	conn = sqlite3.connect('db.db')
 	cursor = conn.cursor()
 	cursor.execute('SELECT parent FROM users WHERE user_id = ?', (user_id,))
@@ -222,6 +243,21 @@ def get_completed_events(user_id):
 
 
 def s_add_event(*args):
+	"""
+    	Adds a new event to the `events` table.
+
+    	Args:
+        args (tuple): 
+            - args[0] (int): The user ID of the event creator.
+            - args[1] (str): The title of the event.
+            - args[2] (str): The description of the event.
+            - args[3] (str): The start time of the event (in "YYYY-MM-DD HH:MM" format).
+            - args[4] (str): The end time of the event (in "YYYY-MM-DD HH:MM" format).
+
+    	Returns:
+        str: Success message if the event is created successfully.
+        str: Error message if the event already exists or if another error occurs.
+    	"""
 	try:
 		conn = sqlite3.connect('db.db')
 		cursor = conn.cursor()
@@ -247,6 +283,22 @@ def s_add_event(*args):
 
 
 def s_update_event(*args):
+	"""
+    	Updates an existing event in the `events` table.
+
+    	Args:
+        args (tuple): 
+            - args[0] (int): The ID of the event to be updated.
+            - args[1] (str): The new title of the event.
+            - args[2] (str): The new description of the event.
+            - args[3] (str): The new start time of the event (in "YYYY-MM-DD HH:MM" format).
+            - args[4] (str): The new end time of the event (in "YYYY-MM-DD HH:MM" format).
+            - args[5] (int): The ID of the user making the update.
+
+    	Returns:
+        str: Success message if the event is updated successfully.
+        str: Error message if an error occurs.
+    	"""
 	try:
 		conn = sqlite3.connect('db.db')
 		cursor = conn.cursor()
@@ -267,6 +319,16 @@ def s_update_event(*args):
 
 
 def s_delete_event(event_id):
+	"""
+    	Deletes an event from the `events` table.
+
+    	Args:
+        event_id (int): The ID of the event to be deleted.
+
+    	Returns:
+        str: Success message if the event is deleted successfully.
+        str: Error message if an error occurs.
+    	"""
 	try:
 		conn = sqlite3.connect('db.db')
 		cursor = conn.cursor()
@@ -281,6 +343,20 @@ def s_delete_event(event_id):
 
 
 def s_join_account(parent, new_user_id, new_username, new_name):
+	"""
+    	Adds a new user to an existing parent account.
+
+    	Args:
+        parent (str): The username of the parent account to join.
+        new_user_id (int): The unique ID of the new user.
+        new_username (str): The username of the new user.
+        new_name (str): The full name of the new user.
+
+    	Returns:
+        str: Success message if the user joins successfully.
+        str: Error message if the parent account is not found.
+        bool: False if the new username is not provided.
+    	"""
 	if new_username:
 		conn = sqlite3.connect('db.db')
 		cursor = conn.cursor()
@@ -305,6 +381,15 @@ def s_join_account(parent, new_user_id, new_username, new_name):
 
 
 def complete_events():
+	"""
+    	Marks events as completed if their end time has passed.
+
+    	This function checks the `events` table for events whose end time is earlier
+    	than the current time and sets their `completed` status to 1.
+
+    	Returns:
+        None
+    	"""
 	conn = sqlite3.connect('db.db')
 	cursor = conn.cursor()
 	current_time = datetime.datetime.now()
