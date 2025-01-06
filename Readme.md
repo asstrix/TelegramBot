@@ -121,3 +121,31 @@ TaskMania Bot is a powerful Telegram bot designed to help users manage tasks, ev
 | `edited_by`   | INTEGER   | ID of the user who last edited the event.             |
 ```
 ## Screenshots:
+
+### Startup menu:
+
+![create](https://github.com/asstrix/files/blob/main/TaskManiaBot/start.png)
+
+### Create or join to an account:
+
+![start](https://github.com/asstrix/files/blob/main/TaskManiaBot/create.png)
+
+### Main menu:
+
+![main](https://github.com/asstrix/files/blob/main/TaskManiaBot/main_menu.png)
+
+### Choose a day:
+
+![choose](https://github.com/asstrix/files/blob/main/TaskManiaBot/choose.png)
+
+## Select event's period:
+
+![period](https://github.com/asstrix/files/blob/main/TaskManiaBot/event%20period.png)
+
+### Choose a day:
+
+![choose](https://github.com/asstrix/files/blob/main/TaskManiaBot/choose.png)
+
+### View an event:
+
+![view](https://github.com/asstrix/files/blob/main/TaskManiaBot/view_event.png)
